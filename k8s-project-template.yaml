@@ -1,0 +1,23 @@
+# Kube-Backlab Project Configuration Template
+# Copy this file to your project as 'k8s-config.yaml' to override lab defaults.
+
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: app-config
+  namespace: dev
+data:
+  PORT: "3000"
+  # Add your project-specific environment variables here
+  CUSTOM_VAR: "value"
+
+---
+apiVersion: v1
+kind: Secret
+metadata:
+  name: app-secrets
+  namespace: dev
+type: Opaque
+stringData:
+  # Add your project-specific secrets here
+  API_KEY: "your-secret-key"
