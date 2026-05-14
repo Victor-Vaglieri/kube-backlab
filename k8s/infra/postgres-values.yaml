@@ -1,0 +1,7 @@
+primary:
+  persistence:
+    existingClaim: postgres-pvc
+global:
+  postgresql:
+    auth:
+      postgresPassword: postgres
