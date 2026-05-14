@@ -5,6 +5,7 @@ metadata:
 build:
   artifacts:
   - image: hello-app
+    context: "{{.PROJECT_PATH}}"
     docker:
       dockerfile: Dockerfile
   local:
