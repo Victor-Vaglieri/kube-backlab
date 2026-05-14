@@ -19,6 +19,28 @@ spec:
         imagePullPolicy: IfNotPresent
         ports:
         - containerPort: 3000
+          name: http
+        livenessProbe:
+          httpGet:
+            path: /healthz/liveness
+            port: http
+          initialDelaySeconds: 5
+          periodSeconds: 10
+        readinessProbe:
+          httpGet:
+            path: /healthz/readiness
+            port: 3000
+          initialDelaySeconds: 5
+          periodSeconds: 10
+        resources:
+          limits:
+            cpu: "200m"
+            memory: "256Mi"
+          requests:
+            cpu: "100m"
+            memory: "128Mi"
         envFrom:
         - configMapRef:
             name: app-config
+        - secretRef:
+            name: app-secrets
