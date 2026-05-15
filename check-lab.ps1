@@ -26,10 +26,10 @@ function Run-InfrastructureChecks {
 
     # 2. Ingress Routing Check
     $response = curl.exe -s -I -H "Host: $HostHeader" "$Endpoint/"
-    if ($response -match "HTTP/1.1 200" -or $response -match "HTTP/1.1 302") {
-        Write-Log "SUCCESS" "Ingress routing for $HostHeader is functional." Green
+    if ($response -match "HTTP/1.1 200" -or $response -match "HTTP/1.1 302" -or $response -match "HTTP/1.1 308") {
+        Write-Log "SUCCESS" "Ingress routing for $HostHeader is functional (Response: $($response | Select-Object -First 1))." Green
     } else {
-        Write-Log "ERROR" "Ingress routing failed (HTTP 404/500). Check IngressClass." Red
+        Write-Log "ERROR" "Ingress routing failed. Expected 200/302/308, but received:`n$response" Red
         return $false
     }
     return $true
