@@ -21,6 +21,12 @@ const initDb = async () => {
         title TEXT NOT NULL,
         completed BOOLEAN DEFAULT FALSE
       );
+      CREATE TABLE IF NOT EXISTS persistence_test (
+        id SERIAL PRIMARY KEY,
+        counter INTEGER DEFAULT 0,
+        last_update TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+      );
+      INSERT INTO persistence_test (counter) SELECT 0 WHERE NOT EXISTS (SELECT 1 FROM persistence_test);
     `);
     client.release();
     console.log('Database initialized');
@@ -55,6 +61,17 @@ const server = http.createServer(async (req, res) => {
 
   // API Routes
   try {
+    if (url === '/pvc-test' && method === 'GET') {
+      const updateResult = await pool.query('UPDATE persistence_test SET counter = counter + 1, last_update = NOW() RETURNING *');
+      res.statusCode = 200;
+      res.setHeader('Content-Type', 'application/json');
+      return res.end(JSON.stringify({
+        message: "PVC Persistence Test",
+        description: "This counter survives pod restarts because it is stored in PostgreSQL with a PersistentVolume.",
+        data: updateResult.rows[0]
+      }));
+    }
+
     if (url === '/tasks' && method === 'GET') {
       const result = await pool.query('SELECT * FROM tasks ORDER BY id ASC');
       res.statusCode = 200;
@@ -76,6 +93,22 @@ const server = http.createServer(async (req, res) => {
           res.statusCode = 400;
           res.end('Invalid JSON');
         }
+      });
+      return;
+    }
+
+    if (url === '/worker' && method === 'GET') {
+      http.get('http://worker-service.dev.svc.cluster.local', (workerRes) => {
+        let data = '';
+        workerRes.on('data', (chunk) => { data += chunk; });
+        workerRes.on('end', () => {
+          res.statusCode = 200;
+          res.setHeader('Content-Type', 'text/plain');
+          res.end(`Response from Worker: ${data}`);
+        });
+      }).on('error', (err) => {
+        res.statusCode = 500;
+        res.end(`Worker unreachable: ${err.message}`);
       });
       return;
     }
