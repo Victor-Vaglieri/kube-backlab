@@ -54,7 +54,7 @@ kube-backlab/
 ### Pré-requisitos
 *   **Docker Desktop**
 *   **k3d, kubectl, helm e skaffold** instalados.
-*   **PowerShell** (para execução dos scripts).
+*   **Go 1.21+** (para execução dos utilitários).
 
 ### Passo a Passo
 
@@ -68,22 +68,28 @@ kube-backlab/
 2. **Iniciar um Projeto:** 
     O laboratório suporta isolamento por nome de projeto (o nome é convertido automaticamente para minúsculas):
     ```powershell
-    # Sobe o projeto padrão no namespace 'dev'
-    ./start-lab.ps1
+    # Opção A (Go - Recomendado para multiplataforma)
+    go run start-lab.go -Project "Meu-App"
 
-    # Sobe um ambiente isolado em um namespace customizado
-    ./start-lab.ps1 -Project "Meu-App" # Criará o namespace 'meu-app'
+    # Opção B (PowerShell)
+    ./start-lab.ps1 -Project "Meu-App"
     ```
 
 3.  **Gerenciar Projetos:**
     ```powershell
-    # Ver o que está rodando e quais as URLs
+    # Opção A (Go)
+    go run list-projects.go
+
+    # Opção B (PowerShell)
     ./list-projects.ps1
     ```
 
 4.  **Validação:**
     ```powershell
-    # Valida a infraestrutura do projeto específico
+    # Opção A (Go)
+    go run check-lab.go -Project "Meu-App"
+
+    # Opção B (PowerShell)
     ./check-lab.ps1 -Project "Meu-App"
     ```
 
@@ -95,21 +101,37 @@ kube-backlab/
 *   **DNS Interno:** `/worker` (Comunicação entre serviços via DNS do K8s)
 *   **Grafana:** [http://grafana.dev.local:8080](http://grafana.dev.local:8080)
 
-## 7. Testes de Resiliência (Fase 4)
+## 7. Testes de Resiliência (Caos)
 
 1. Acesse `/pvc-test` e anote o valor do contador.
 2. Execute o simulador para o seu projeto:
     ```powershell
+    # Opção A (Go)
+    go run simulate-failure.go -Project "Meu-App"
+
+    # Opção B (PowerShell)
     ./simulate-failure.ps1 -Project "Meu-App"
     ```
 3. Aguarde o Kubernetes recriar o pod e valide que o contador continua de onde parou.
 
-## 8. Desligamento
+## 8. Debug e Logs
 
 ```powershell
-# Para apenas um projeto específico
-./stop-lab.ps1 -Project "meu-app"
+# Opção A (Go)
+go run debug-logs.go -Project "Meu-App"
 
-# Para desligar o cluster inteiro e todos os projetos
+# Opção B (PowerShell)
+./debug-logs.ps1 -Project "Meu-App"
+```
+
+## 9. Desligamento
+
+```powershell
+# Opção A (Go)
+go run stop-lab.go -Project "meu-app"
+go run stop-lab.go -Full # Para tudo e desliga o cluster
+
+# Opção B (PowerShell)
+./stop-lab.ps1 -Project "meu-app"
 ./stop-lab.ps1 -Full
 ```
