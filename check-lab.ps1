@@ -1,8 +1,18 @@
 param(
     [string]$ProjectPath = ".",
+    [string]$Project = "",
     [string]$HostHeader = "hello.dev.local",
     [string]$Endpoint = "http://localhost:8080"
 )
+
+if ($Project) {
+    $Project = $Project.ToLower()
+    if ($Project -eq "dev") {
+        $HostHeader = "hello.dev.local"
+    } else {
+        $HostHeader = "$($Project).dev.local"
+    }
+}
 
 function Write-Log {
     param([string]$Level, [string]$Message, [ConsoleColor]$Color)
@@ -13,7 +23,6 @@ function Write-Log {
 function Run-InfrastructureChecks {
     Write-Host "`n--- [ INFRASTRUCTURE VALIDATION ] ---" -ForegroundColor Cyan
     
-    # 1. Gateway Check
     try {
         $tcp = New-Object System.Net.Sockets.TcpClient
         $tcp.Connect("localhost", 8080)
@@ -24,7 +33,6 @@ function Run-InfrastructureChecks {
         return $false
     }
 
-    # 2. Ingress Routing Check
     $response = curl.exe -s -I -H "Host: $HostHeader" "$Endpoint/"
     if ($response -match "HTTP/1.1 200" -or $response -match "HTTP/1.1 302" -or $response -match "HTTP/1.1 308") {
         Write-Log "SUCCESS" "Ingress routing for $HostHeader is functional (Response: $($response | Select-Object -First 1))." Green
@@ -46,13 +54,11 @@ function Run-ProjectTests {
     
     $srcPath = Join-Path $ProjectPath "src"
     
-    # 1. Run Standard Package Tests if they exist
     if (Test-Path (Join-Path $srcPath "package.json")) {
         Write-Log "INFO" "Node.js project detected. Running npm test..." White
         npm test --prefix $srcPath
     }
 
-    # 2. Run any custom .ps1 scripts found in test directories
     $foundCustom = $false
     foreach ($path in $testPaths) {
         if (Test-Path $path) {

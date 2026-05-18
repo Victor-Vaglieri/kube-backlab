@@ -1,4 +1,5 @@
 param(
+    [string]$Project = "dev",
     [switch]$Watch = $false
 )
 
@@ -8,7 +9,10 @@ function Write-Log {
     Write-Host "[$timestamp] [$Level] $Message" -ForegroundColor $Color
 }
 
+$Namespace = $Project.ToLower()
+
 Write-Host "`n=== KUBE-BACKLAB DIAGNOSTIC LOGS ===" -ForegroundColor Cyan
+Write-Host "Target Project: $Namespace" -ForegroundColor Gray
 
 $failingPods = kubectl get pods -A --no-headers | Where-Object { $_ -notmatch "Running" -and $_ -notmatch "Completed" }
 
@@ -31,17 +35,17 @@ if ($failingPods) {
     Write-Log "SUCCESS" "All pods are healthy (Running/Completed)." Green
 }
 
-Write-Host "`n--- [ APPLICATION LOGS (dev) ] ---" -ForegroundColor Cyan
-$appPod = kubectl get pods -n dev -l app=hello-app -o name | Select-Object -First 1
+Write-Host "`n--- [ APPLICATION LOGS ($Namespace) ] ---" -ForegroundColor Cyan
+$appPod = kubectl get pods -n $Namespace -l app=hello-app -o name | Select-Object -First 1
 if ($appPod) {
     if ($Watch) {
         Write-Log "INFO" "Streaming application logs... (Ctrl+C to stop)" White
-        kubectl logs -n dev $appPod -f
+        kubectl logs -n $Namespace $appPod -f
     } else {
-        kubectl logs -n dev $appPod --tail=20
+        kubectl logs -n $Namespace $appPod --tail=20
     }
 } else {
-    Write-Log "WARN" "No application pod found in 'dev' namespace." Yellow
+    Write-Log "WARN" "No application pod found in '$Namespace' namespace." Yellow
 }
 
 Write-Host "`n--- [ INFRASTRUCTURE LOGS (infra) ] ---" -ForegroundColor Cyan
