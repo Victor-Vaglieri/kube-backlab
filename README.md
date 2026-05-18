@@ -59,16 +59,20 @@ kube-backlab/
 ### Passo a Passo
 
 1.  **Configuração de Rede:**
-    Adicione ao arquivo `hosts` os projetos que deseja usar (ex: `hello.dev.local`, `projeto-a.dev.local`).
+    Para cada novo projeto, você **precisa** adicionar uma entrada ao seu arquivo `hosts` (C:\Windows\System32\drivers\etc\hosts):
+    ```text
+    127.0.0.1  hello.dev.local
+    127.0.0.1  meu-app.dev.local
+    ```
 
 2. **Iniciar um Projeto:** 
-    O laboratório suporta isolamento por nome de projeto:
+    O laboratório suporta isolamento por nome de projeto (o nome é convertido automaticamente para minúsculas):
     ```powershell
     # Sobe o projeto padrão no namespace 'dev'
     ./start-lab.ps1
 
     # Sobe um ambiente isolado em um namespace customizado
-    ./start-lab.ps1 -Project "meu-app"
+    ./start-lab.ps1 -Project "Meu-App" # Criará o namespace 'meu-app'
     ```
 
 3.  **Gerenciar Projetos:**
@@ -79,13 +83,14 @@ kube-backlab/
 
 4.  **Validação:**
     ```powershell
-    ./check-lab.ps1 -HostHeader "meu-app.dev.local"
+    # Valida a infraestrutura do projeto específico
+    ./check-lab.ps1 -Project "Meu-App"
     ```
 
 ## 6. Funcionalidades de Rede e Observabilidade
 
 ### Endpoints (Porta 8080)
-*   **App Principal:** `http://<projeto>.dev.local:8080`
+*   **App Principal:** `http://<projeto>.dev.local:8080` (Default: `hello.dev.local`)
 *   **Teste de PVC:** `/pvc-test` (Contador que sobrevive ao caos)
 *   **DNS Interno:** `/worker` (Comunicação entre serviços via DNS do K8s)
 *   **Grafana:** [http://grafana.dev.local:8080](http://grafana.dev.local:8080)
@@ -93,7 +98,10 @@ kube-backlab/
 ## 7. Testes de Resiliência (Fase 4)
 
 1. Acesse `/pvc-test` e anote o valor do contador.
-2. Execute `./simulate-failure.ps1` (ele matará um pod do projeto).
+2. Execute o simulador para o seu projeto:
+    ```powershell
+    ./simulate-failure.ps1 -Project "Meu-App"
+    ```
 3. Aguarde o Kubernetes recriar o pod e valide que o contador continua de onde parou.
 
 ## 8. Desligamento
