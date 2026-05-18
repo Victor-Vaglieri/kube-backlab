@@ -7,6 +7,7 @@ param(
 
 if ($Project) {
     $Project = $Project.ToLower()
+    $env:PROJECT_NAME = $Project # Garante consistência para testes customizados
     if ($Project -eq "dev") {
         $HostHeader = "hello.dev.local"
     } else {
