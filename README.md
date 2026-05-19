@@ -19,28 +19,33 @@ Abaixo estão documentadas as evidências que comprovam a implementação dos ob
 ### 2.1 Automação e Isolamento (Namespaces)
 O sistema realiza o deploy automatizado garantindo o isolamento lógico entre a infraestrutura de dados e a camada de aplicação através de Namespaces dedicadas.
 
-![IMG 1](https://via.placeholder.com/800x400?text=IMG+1+-+Isolamento+de+Namespaces)
+<img width="758" height="350" alt="image" src="https://github.com/user-attachments/assets/a0e8ab23-2ef6-4ae4-a5f2-a6ec325db8a5" />
+
 *Demonstração da estrutura de Namespaces e Pods em execução.*
 
 ### 2.2 Persistência de Dados (PostgreSQL + PVC)
 A resiliência de dados é garantida pelo uso de Persistent Volume Claims. O contador de hits mantém seu estado mesmo após a deleção ou reinicialização dos Pods de aplicação.
 
-![IMG 2](https://via.placeholder.com/800x400?text=IMG+2+-+Persistência+de+Dados)
-*Evidência de persistência: o estado é mantido entre ciclos de vida dos Pods.*
+<img width="886" height="150" alt="image" src="https://github.com/user-attachments/assets/2db9959d-7a1b-4d0e-8969-6631f2a46949" />
+
+*Evidência de persistência: o estado é mantido entre ciclos de vida dos Pods, a qual o numero de hits se manteve*
 
 ### 2.3 Descoberta de Serviços (DNS Interno)
 A comunicação entre microsserviços utiliza a resolução de nomes nativa do Kubernetes (CoreDNS), permitindo que a aplicação principal alcance serviços secundários via endereços internos.
 
-![IMG 3](https://via.placeholder.com/800x400?text=IMG+3+-+Resolução+DNS+Interno)
+<img width="886" height="89" alt="image" src="https://github.com/user-attachments/assets/28795145-32dc-4151-a0e8-98712cd76b9a" />
+
 *Comunicação service-to-service via FQDN interno.*
 
 ### 2.4 Observabilidade e Monitoramento
 A saúde do sistema é monitorada via Liveness/Readiness probes, com visualização centralizada de métricas de performance no Grafana.
 
-![IMG 4](https://via.placeholder.com/800x400?text=IMG+4+-+Configuração+de+Health+Checks)
+<img width="886" height="106" alt="image" src="https://github.com/user-attachments/assets/222011d9-65f3-438d-9db3-c6d2e02daf96" />
+
 *Detalhamento das sondas de saúde no manifesto do Pod.*
 
-![IMG 5](https://via.placeholder.com/800x400?text=IMG+5+-+Dashboard+Grafana)
+<img width="886" height="423" alt="image" src="https://github.com/user-attachments/assets/d229f5ca-4b2c-4ee0-b062-7b1e36c54820" />
+
 *Monitoramento de recursos computacionais em tempo real.*
 
 ## 3. Ciclo de Desenvolvimento
@@ -93,17 +98,38 @@ kube-backlab/
 
 2. **Iniciar um Projeto:** 
     ```powershell
+    # Opção A (Go - Recomendado para multiplataforma)
     go run start-lab.go -Project "Meu-App"
+
+    # Opção B (PowerShell)
+    ./start-lab.ps1 -Project "Meu-App"
     ```
 
 3.  **Validação:**
     ```powershell
+    # Opção A (Go)
     go run check-lab.go -Project "Meu-App"
+
+    # Opção B (PowerShell)
+    ./check-lab.ps1 -Project "Meu-App"
     ```
+4. **Testes de Resiliência (Caos)**
+   ```powershell
+   # Opção A (Go)
+    go run simulate-failure.go -Project "Meu-App"
+
+    # Opção B (PowerShell)
+    ./simulate-failure.ps1 -Project "Meu-App"
+   ```
 
 ## 7. Desligamento
 
 ```powershell
-go run stop-lab.go -Project "meu-app"
+# Opção A (Go)
+go run stop-lab.go -Project "Meu-App"
 go run stop-lab.go -Full
+
+# Opção B (PowerShell)
+./stop-lab.ps1 -Project "Meu-App"
+./stop-lab.ps1 -Full
 ```
