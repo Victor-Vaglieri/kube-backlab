@@ -74,7 +74,7 @@ const server = http.createServer(async (req, res) => {
 
   // 3. Teste de DNS Interno (Demonstração de comunicação Service-to-Service)
   if (url === '/demo/dns' && method === 'GET') {
-    const target = 'http://worker-service.meu-projeto.svc.cluster.local';
+    const target = 'http://worker-service';
     
     const request = http.get(target, (workerRes) => {
       let data = '';
