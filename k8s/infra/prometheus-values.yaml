@@ -1,0 +1,12 @@
+grafana:
+  ingress:
+    enabled: true
+    hosts:
+      - grafana.dev.local
+    ingressClassName: traefik
+prometheus:
+  ingress:
+    enabled: true
+    hosts:
+      - prometheus.dev.local
+    ingressClassName: traefik
