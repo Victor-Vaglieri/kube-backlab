@@ -15,3 +15,13 @@ deploy:
     manifests:
     - k8s/*.yaml
     - k8s/worker.yaml
+    - k8s/infra/postgres-pvc.yaml
+  helm:
+    releases:
+    - name: postgres
+      repo: https://charts.bitnami.com/bitnami
+      remoteChart: postgresql
+      namespace: infra
+      createNamespace: true
+      valuesFiles:
+      - k8s/infra/postgres-values.yaml
