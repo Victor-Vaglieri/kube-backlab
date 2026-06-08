@@ -25,3 +25,10 @@ deploy:
       createNamespace: true
       valuesFiles:
       - k8s/infra/postgres-values.yaml
+    - name: prometheus
+      repo: https://prometheus-community.github.io/helm-charts
+      remoteChart: kube-prometheus-stack
+      namespace: monitoring
+      createNamespace: true
+      valuesFiles:
+      - k8s/infra/prometheus-values.yaml
