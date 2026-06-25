@@ -74,11 +74,11 @@ A saúde do sistema é monitorada via Liveness/Readiness probes, com visualizaç
 ## 6. Desafios Enfrentados e Soluções
 
 *   **Persistência de Dados em Clusters Efêmeros:** 
-    *   *Desafio:* Manter o estado do banco de dados (PostgreSQL) intocável mesmo em meio a deleções constantes de pods durante o desenvolvimento local.
-    *   *Solução:* Adoção de Helm Charts robustos (Bitnami) com Persistent Volume Claims (PVC) devidamente mapeados, garantindo a retenção da integridade de dados e estado da aplicação entre as reinicializações.
+    *   *Desafio:* Manter o estado do banco de dados intocável mesmo em meio a deleções constantes de pods durante o desenvolvimento local.
+    *   *Solução:* Adoção de Helm Charts (Bitnami) com Persistent Volume Claims (PVC) mapeados, garantindo a retenção da integridade de dados e estado da aplicação entre as reinicializações.
 *   **Resolução de DNS Interno (Service-to-Service):**
-    *   *Desafio:* Fazer com que a aplicação principal e os workers secundários se comunicassem de forma confiável e orgânica.
-    *   *Solução:* Utilização do CoreDNS nativo do Kubernetes para resolver comunicação entre serviços via FQDN (Fully Qualified Domain Name) interno, dispensando IPs estáticos e mimetizando uma topologia real de microsserviços em produção.
+    *   *Desafio:* Fazer com que a aplicação principal e os workers secundários se comunicassem de forma confiável.
+    *   *Solução:* Utilização do CoreDNS do Kubernetes para resolver comunicação entre serviços via FQDN (Fully Qualified Domain Name) interno, dispensando IPs estáticos e copiando uma topologia usada no mercado de microsserviços em produção.
 
 ## 7. Estrutura do Projeto
 
