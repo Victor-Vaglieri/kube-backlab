@@ -65,27 +65,50 @@ A saúde do sistema é monitorada via Liveness/Readiness probes, com visualizaç
 *   **Ingress:** Nginx Ingress Controller com suporte a TLS simulado.
 *   **Automação:** Skaffold & PowerShell (Gerenciamento de Ciclo de Vida).
 
-## 5. Estrutura do Projeto
+## 5. Motivação e Escolhas Arquiteturais (Trade-offs)
+
+*   **k3d vs Minikube/Kind:** A escolha do **k3d** foi baseada da sua leveza e rapidez. Por rodar clusters Kubernetes dentro de containers Docker, ele consome menos recursos do Host e permite uma melhor recriação de ambientes locais se comparado a soluções baseadas em máquinas virtuais.
+*   **Skaffold para Inner-loop:** Para evitar o processo manual de `docker build` + `kubectl apply`, foi adotado o **Skaffold**. Ele monitora alterações no código-fonte (`/src`), automatiza builds via multi-stage Dockerfile e injeta as mudanças no cluster.
+*   **Ingress Local vs Port-Forwards:** A configuração de um Nginx Ingress Controller com DNS local simulado (ex: `hello.dev.local`) traz a experiência de acesso melhor ao ambiente, permitindo testar regras de roteamento e TLS.
+
+## 6. Desafios Enfrentados e Soluções
+
+*   **Persistência de Dados em Clusters Efêmeros:** 
+    *   *Desafio:* Manter o estado do banco de dados (PostgreSQL) intocável mesmo em meio a deleções constantes de pods durante o desenvolvimento local.
+    *   *Solução:* Adoção de Helm Charts robustos (Bitnami) com Persistent Volume Claims (PVC) devidamente mapeados, garantindo a retenção da integridade de dados e estado da aplicação entre as reinicializações.
+*   **Resolução de DNS Interno (Service-to-Service):**
+    *   *Desafio:* Fazer com que a aplicação principal e os workers secundários se comunicassem de forma confiável e orgânica.
+    *   *Solução:* Utilização do CoreDNS nativo do Kubernetes para resolver comunicação entre serviços via FQDN (Fully Qualified Domain Name) interno, dispensando IPs estáticos e mimetizando uma topologia real de microsserviços em produção.
+
+## 7. Estrutura do Projeto
 
 ```text
 kube-backlab/
+├── cmd/                  # Ferramentas em Go para gestão do laboratório
+│   ├── check-lab.go      # Validação de infra e testes de integração
+│   ├── debug-logs.go     # Logs unificados e diagnóstico de falhas
+│   ├── list-projects.go  # Lista todos os projetos ativos no cluster
+│   ├── simulate-failure.go # Simula falha matando um pod aleatório
+│   ├── start-lab.go      # Setup mestre com suporte a múltiplos projetos
+│   └── stop-lab.go       # Shutdown seletivo por projeto ou total (-Full)
 ├── k8s/                  # Manifestos Kubernetes Parametrizados
 │   ├── infra/            # Configurações de infraestrutura (Postgres, PVC, Values)
 │   ├── worker.yaml       # Serviço secundário para testes de rede interna
 │   └── ...               # ConfigMaps, Secrets, Ingress e Deployments
+├── scripts/              # Scripts em PowerShell para gestão
+│   ├── check-lab.ps1
+│   ├── debug-logs.ps1
+│   ├── list-projects.ps1
+│   ├── simulate-failure.ps1
+│   ├── start-lab.ps1
+│   └── stop-lab.ps1
 ├── src/                  # Código-fonte da aplicação (Node.js)
 │   ├── test/             # Scripts de teste customizados (.ps1)
 │   └── app.js            # Core Backend com lógica de API e Banco
-├── check-lab.ps1         # Validação de infra e testes de integração
-├── debug-logs.ps1        # Logs unificados e diagnóstico de falhas
-├── list-projects.ps1     # Lista todos os projetos ativos no cluster
-├── simulate-failure.ps1  # Simula falha matando um pod aleatório
-├── start-lab.ps1         # Setup mestre com suporte a múltiplos projetos
-├── stop-lab.ps1          # Shutdown seletivo por projeto ou total (-Full)
 └── skaffold.yaml         # Automação de build e deploy
 ```
 
-## 6. Execução
+## 8. Execução
 
 ### Passo a Passo
 
@@ -99,37 +122,37 @@ kube-backlab/
 2. **Iniciar um Projeto:** 
     ```powershell
     # Opção A (Go - Recomendado para multiplataforma)
-    go run start-lab.go -Project "Meu-App"
+    go run ./cmd/start-lab.go -Project "Meu-App"
 
     # Opção B (PowerShell)
-    ./start-lab.ps1 -Project "Meu-App"
+    ./scripts/start-lab.ps1 -Project "Meu-App"
     ```
 
 3.  **Validação:**
     ```powershell
     # Opção A (Go)
-    go run check-lab.go -Project "Meu-App"
+    go run ./cmd/check-lab.go -Project "Meu-App"
 
     # Opção B (PowerShell)
-    ./check-lab.ps1 -Project "Meu-App"
+    ./scripts/check-lab.ps1 -Project "Meu-App"
     ```
 4. **Testes de Resiliência (Caos)**
    ```powershell
    # Opção A (Go)
-    go run simulate-failure.go -Project "Meu-App"
+    go run ./cmd/simulate-failure.go -Project "Meu-App"
 
     # Opção B (PowerShell)
-    ./simulate-failure.ps1 -Project "Meu-App"
+    ./scripts/simulate-failure.ps1 -Project "Meu-App"
    ```
 
-## 7. Desligamento
+## 9. Desligamento
 
 ```powershell
 # Opção A (Go)
-go run stop-lab.go -Project "Meu-App"
-go run stop-lab.go -Full
+go run ./cmd/stop-lab.go -Project "Meu-App"
+go run ./cmd/stop-lab.go -Full
 
 # Opção B (PowerShell)
-./stop-lab.ps1 -Project "Meu-App"
-./stop-lab.ps1 -Full
+./scripts/stop-lab.ps1 -Project "Meu-App"
+./scripts/stop-lab.ps1 -Full
 ```
